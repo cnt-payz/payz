@@ -1,0 +1,8 @@
+PROTO_SERVICE=?
+PROTO_VERSION=v1
+
+proto:
+	protoc --proto_path=./contracts \
+		--go_out=./$(PROTO_SERVICE)-service/api --go_opt=paths=source_relative \
+		--go-grpc_out=./$(PROTO_SERVICE)-service/api --go-grpc_opt=paths=source_relative \
+		./contracts/$(PROTO_SERVICE)/$(PROTO_VERSION)/$(PROTO_SERVICE).proto
