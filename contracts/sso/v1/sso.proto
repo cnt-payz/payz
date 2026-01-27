@@ -1,0 +1,84 @@
+syntax="proto3";
+package sso.v1;
+option go_package="github.com/cnt-payz/payz/sso; ssopb";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+// Domain model of session
+message Token {
+    string access = 1;
+    string refresh = 2;
+
+    google.protobuf.Timestamp access_expires_at = 3;
+    google.protobuf.Timestamp refresh_expires_at = 4;
+
+    reserved 5 to 10;
+}
+
+// Domain model of user
+message User {
+    string id = 1;
+    string email = 2;
+ 
+    google.protobuf.Timestamp created_at = 3;
+
+    reserved 4 to 10;
+}
+
+service SSO {
+    // Login rpc, needs to create token based-on existed user
+    // REQUIRES: mtls-connection
+    // METADATA: x-client-ip, user-agent
+    rpc Login(LoginRequest) returns (Token);
+    // Register rpc, creates new user and generate pair of token
+    // REQUIRES: mtls-connection
+    // METADATA: x-client-ip, user-agent
+    rpc Register(RegisterRequest) returns (Token);
+    // Refresh a pair of tokens by refresh token
+    // REQUIRES: mtls-connection
+    // METADATA: x-client-ip, user-agent
+    rpc Refresh(RefreshRequest) returns (Token);
+    // Logout all sessions
+    // REQUIRES: mtls-connection
+    // METADATA: x-client-ip, user-agent, jwt-access-token of user
+    rpc LogoutAll(LogoutRequest) returns (google.protobuf.Empty);
+
+    // Get user by id
+    // REQUIRES: mtls-connection
+    rpc GetUserByID(GetByIDRequest) returns (User);
+    // Get user by email
+    // REQUIRES: mtls-connection
+    rpc GetUserByEmail(GetByEmailRequest) returns (User);
+    // Get self-user by access-token
+    // REQUIRES: mtls-connection
+    // METADATA: jwt-access-token of user
+    rpc GetSelfUser(google.protobuf.Empty) returns (User);
+}
+
+message LoginRequest {
+    string email = 1;
+    string password = 2;
+}
+
+message RegisterRequest {
+    string email = 1;
+    string password = 2;
+    string idempotency_key = 3;
+}
+
+message RefreshRequest {
+    string refresh_token = 1;
+}
+
+message LogoutRequest {
+    string refresh_token = 1;
+}
+
+message GetByIDRequest {
+    string user_id = 1;
+}
+
+message GetByEmailRequest {
+    string email = 1;
+}
