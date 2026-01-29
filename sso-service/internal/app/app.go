@@ -78,9 +78,12 @@ func New() (*App, func(), error) {
 	fileManager := filemanager.New()
 
 	packInterceptors := interceptors.New(jwtMngr, map[string]bool{
-		ssopb.SSO_Refresh_FullMethodName:     true,
-		ssopb.SSO_Delete_FullMethodName:      true,
-		ssopb.SSO_GetSelfUser_FullMethodName: true,
+		ssopb.SSO_Refresh_FullMethodName:        true,
+		ssopb.SSO_Register_FullMethodName:       true,
+		ssopb.SSO_Login_FullMethodName:          true,
+		ssopb.SSO_GetPublicKey_FullMethodName:   true,
+		ssopb.SSO_GetUserByEmail_FullMethodName: true,
+		ssopb.SSO_GetUserByID_FullMethodName:    true,
 	})
 
 	grpcServer, err := provideGrpcServer(cfg, packInterceptors)

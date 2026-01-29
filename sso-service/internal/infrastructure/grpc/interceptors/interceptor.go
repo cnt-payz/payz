@@ -12,14 +12,14 @@ import (
 )
 
 type PackInterceptors struct {
-	jwtMngr     session.JWTManager
-	authRequire map[string]bool
+	jwtMngr session.JWTManager
+	noAuth  map[string]bool
 }
 
-func New(jwtMngr session.JWTManager, authRequire map[string]bool) *PackInterceptors {
+func New(jwtMngr session.JWTManager, noAuth map[string]bool) *PackInterceptors {
 	return &PackInterceptors{
-		jwtMngr:     jwtMngr,
-		authRequire: authRequire,
+		jwtMngr: jwtMngr,
+		noAuth:  noAuth,
 	}
 }
 
@@ -49,7 +49,7 @@ func (pi *PackInterceptors) BaseInterceptor() grpc.UnaryServerInterceptor {
 
 func (pi *PackInterceptors) AuthInterceptor() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {
-		if !pi.authRequire[info.FullMethod] {
+		if pi.noAuth[info.FullMethod] {
 			return handler(ctx, req)
 		}
 

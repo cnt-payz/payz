@@ -14,6 +14,6 @@ type JWTManager interface {
 
 type PayzClaims struct {
 	jwt.RegisteredClaims
-	UserID uuid.UUID
-	Email  string
+	UserID uuid.UUID `json:"user_id"`
+	Email  string    `json:"email"`
 }

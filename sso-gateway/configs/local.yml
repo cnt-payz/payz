@@ -1,0 +1,22 @@
+env: dev
+
+app:
+  name: sso-gateway
+  version: v0.0.1
+
+server:
+  http:
+    host: localhost
+    port: 7080
+  read-timeout: 3s
+  write-timeout: 3s
+  idle-timeout: 40s
+
+rate-limit:
+  window: 5s
+  limit: 2
+
+services:
+  payz-sso:
+    host: localhost
+    port: 50050

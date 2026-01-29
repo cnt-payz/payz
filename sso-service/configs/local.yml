@@ -1,4 +1,4 @@
-env: prod
+env: dev
 
 app:
   name: payz-sso-service
