@@ -42,7 +42,11 @@ service SSO {
     // Logout all sessions
     // REQUIRES: mtls-connection
     // METADATA: x-client-ip, user-agent, jwt-access-token of user
-    rpc LogoutAll(LogoutRequest) returns (google.protobuf.Empty);
+    rpc LogoutAll(google.protobuf.Empty) returns (google.protobuf.Empty);
+    // Delete user
+    // REQUIRES: mtls-connection
+    // METADATA: x-client-ip, user-agent, jwt-access-token of user
+    rpc Delete(google.protobuf.Empty) returns (google.protobuf.Empty);
 
     // Get user by id
     // REQUIRES: mtls-connection
@@ -54,6 +58,14 @@ service SSO {
     // REQUIRES: mtls-connection
     // METADATA: jwt-access-token of user
     rpc GetSelfUser(google.protobuf.Empty) returns (User);
+
+    // Get public key of authorization
+    // METADATA: mtls-connection
+    rpc GetPublicKey(google.protobuf.Empty) returns (PublicKey);
+}
+
+message PublicKey {
+    bytes body = 1;
 }
 
 message LoginRequest {
@@ -64,14 +76,9 @@ message LoginRequest {
 message RegisterRequest {
     string email = 1;
     string password = 2;
-    string idempotency_key = 3;
 }
 
 message RefreshRequest {
-    string refresh_token = 1;
-}
-
-message LogoutRequest {
     string refresh_token = 1;
 }
 

@@ -7,3 +7,6 @@
 prod.yml
 
 *.log
+
+counter.go
+linec.go

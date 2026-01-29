@@ -1,0 +1,41 @@
+env: dev
+
+app:
+  name: payz-sso-service
+  version: v0.0.1
+
+server:
+  grpc:
+    protocol: tcp
+    host: 0.0.0.0
+    port: 50050
+    tls:
+      enable: false
+  timeout: 3s
+
+secrets:
+  postgres:
+    host: localhost
+    port: 5432
+    user: user
+    password: password
+    dbname: name
+    conn-max-idle-time: 30m
+    conn-max-lifetime: 5m
+    max-idle-conns: 15
+    max-open-conns: 5
+    sslmode: disable
+
+  jwt: 
+    private-key-path: ./jwtRS256.key
+    public-key-path: ./jwtRS256.key.pub
+    access-ttl: 96h
+
+  redis:
+    host: localhost
+    port: 6379
+    db: 0
+    user: user
+    password: password
+    session-ttl: 168h
+    user-ttl: 5m
