@@ -14,7 +14,7 @@ server:
 
 rate-limit:
   window: 5s
-  limit: 2
+  limit: 100
 
 services:
   payz-sso:

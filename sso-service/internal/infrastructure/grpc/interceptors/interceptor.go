@@ -3,6 +3,7 @@ package interceptors
 import (
 	"context"
 
+	ssopb "github.com/cnt-payz/payz/sso-service/api/sso/v1"
 	"github.com/cnt-payz/payz/sso-service/internal/domain/session"
 	"github.com/cnt-payz/payz/sso-service/pkg/consts"
 	"google.golang.org/grpc"
@@ -25,6 +26,10 @@ func New(jwtMngr session.JWTManager, noAuth map[string]bool) *PackInterceptors {
 
 func (pi *PackInterceptors) BaseInterceptor() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {
+		if info.FullMethod == ssopb.SSO_GetPublicKey_FullMethodName {
+			return handler(ctx, req)
+		}
+
 		md, ok := metadata.FromIncomingContext(ctx)
 		if !ok {
 			return nil, status.Error(codes.InvalidArgument, "invalid metadata")

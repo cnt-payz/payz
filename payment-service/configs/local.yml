@@ -1,0 +1,55 @@
+env: dev
+
+app:
+  name: payz-payment-service
+  version: v0.0.1
+
+server:
+  grpc:
+    host: localhost
+    port: 50052
+    protocol: tcp
+    tls:
+      enable: true
+      server-cert: ./certs/payment-service.crt
+      server-key: ./certs/payment-service.key
+      ca-cert: ./certs/ca.crt
+  timeout: 3s
+
+service:
+  private: ${SERVICE_PRIVATE}
+  transaction-timeout: 5s
+  time:
+    window: 5h
+  idempotency:
+    ttl: 24h
+
+secrets:
+  postgres:
+    host: localhost
+    port: 5432
+    sslmode: disable
+    user: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+    dbname: ${POSTGRES_DBNAME}
+    worker-ticker: 5s
+    conn:
+      max-lifetime: 30m
+      max-idletime: 15m
+      max-idle: 15
+      max-open: 5
+  
+  redis:
+    host: localhost
+    port: 6379
+    db: ${REDIS_DB}
+    username: ${REDIS_USERNAME}
+    password: ${REDIS_PASSWORD}
+
+  jwt:
+    public-key-path: ./jwtRS256.key.pub
+  
+  kafka: 
+    host: localhost
+    port: 9092
+    topic: notification-messages
