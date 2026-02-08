@@ -1,0 +1,24 @@
+grpc:
+  host: ${GRPC_HOST}
+  port: ${GRPC_PORT}
+  tls:
+    enable: false
+    ca-cert: ./certs/ca.crt
+    server-cert: ./certs/shop-service.crt
+    server-key: ./certs/shop-service.key
+  sso:
+    host: ${SSO_HOST}
+    port: ${SSO_PORT}
+db:
+  name: ${DB_NAME}
+  user: ${DB_USER}
+  password: ${DB_PASSWORD}
+  host: ${DB_HOST}
+  port: ${DB_PORT}
+redis:
+  host: ${REDIS_HOST}
+  port: ${REDIS_PORT}
+logger:
+  level: debug
+  output-type: console
+  json-format: false

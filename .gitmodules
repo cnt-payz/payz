@@ -1,0 +1,9 @@
+[submodule "shop-service/pkg/log"]
+	path = shop-service/pkg/log
+	url = https://github.com/braunkc/log
+[submodule "shop-gateway/pkg/log"]
+	path = shop-gateway/pkg/log
+	url = https://github.com/braunkc/log
+[submodule "crypto-service/pkg/log"]
+	path = crypto-service/pkg/log
+	url = https://github.com/braunkc/log
