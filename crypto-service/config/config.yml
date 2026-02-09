@@ -1,0 +1,25 @@
+grpc:
+  host: ${GRPC_HOST}
+  port: ${GRPC_PORT}
+  tls:
+    enable: false
+    ca-cert: ./certs/ca.crt
+    server-cert: ./certs/shop-service.crt
+    server-key: ./certs/shop-service.key
+  payment-service:
+    host: ${GRPC_PAYMENT_SERVICE_HOST}
+    port: ${GRPC_PAYMENT_SERVICE_PORT}
+    private-key-payment-service: ${PRIVATE_KEY_PAYMENT_SERVICE}
+node:
+  polygon-testnet-node-address: ${POLYGON_TESTNET_NODE_ADDRESS}
+  polygon-testnet-node-websocket-address: ${POLYGON_TESTNET_NODE_WEBSOCKET_ADDRESS}
+db:
+  name: ${DB_NAME}
+  user: ${DB_USER}
+  password: ${DB_PASSWORD}
+  host: ${DB_HOST}
+  port: ${DB_PORT}
+logger:
+  level: debug
+  output-type: console
+  json-format: false
