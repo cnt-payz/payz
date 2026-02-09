@@ -1,0 +1,127 @@
+syntax="proto3";
+package payment.v1;
+option go_package="github.com/cnt-payz/payz/payment; paymentpb";
+
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+
+enum Status {
+    STATUS_UNKNOWN = 0;
+    STATUS_PENDING = 1;
+    STATUS_SUCCESS = 2;
+    STATUS_CANCELED = 3;
+    STATUS_DEADLINE = 4;
+}
+
+enum Typ {
+    TYPE_UNKNOWN = 0;
+    TYPE_DEPOSIT = 1;
+    TYPE_WITHDRAW = 2;
+}
+
+message Amount {
+    string amount = 1; //  "1000000" = 1usdt
+}
+
+// Domain model of ex-transaction
+message ExTransaction {
+    string id = 1;
+    string shop_id = 2;
+    string user_id = 3;
+
+    Status status = 4;
+    Typ typ = 5;
+
+    Amount amount = 6;
+
+    string callback_url = 7;
+
+    google.protobuf.Struct user_metadata = 8;
+
+    google.protobuf.Timestamp created_at = 9;
+    google.protobuf.Timestamp updated_at = 10;
+
+    reserved 11 to 15;
+}
+
+message ExHistory {
+    repeated ExTransaction transactions = 1;
+    google.protobuf.Timestamp timestamp = 2;
+}
+
+message Balances {
+    string frozen = 1;
+    string general = 2;
+}
+
+service Payment {
+    // Create an ex-transaction
+    // REQUIRES: mtls connection
+    // METADATA: authorization
+    rpc MakeExTransaction(MakeExRequest) returns (MakeExResponse);
+    // Confirm an ex-transaction
+    // REQUIRES: mtls connection
+    // METADATA: idempotency-key
+    rpc ConfirmExTransaction(ActionExRequest) returns (ExTransaction);
+    // Cancel an ex-transaction
+    // REQUIRES: mtls connection
+    // METADATA: idempotency-key
+    rpc CancelExTransaction(ActionExRequest) returns (ExTransaction);
+    
+    // Get ex-history
+    // REQUIRES: mtls connection
+    // METADATA: authorization
+    rpc GetExHistory(GetHistoryRequest) returns (ExHistory);
+    // Get ex-transaction
+    // REQUIRES: mtls connection
+    // METADATA: authorization
+    rpc GetExTransaction(GetExRequest) returns (ExTransaction);
+    
+    // Get balance from crypto
+    // REQUIRES: mtls connection
+    rpc GetBalances(GetBalancesRequest) returns (Balances);
+}
+
+message MakeExResponse {
+    ExTransaction transaction = 1;
+    string target_address = 2;
+}
+
+message MakeExRequest {
+    string shop_id = 1;
+
+    Typ typ = 2;
+    Amount amount = 3;
+
+    string callback_url = 4;
+
+    google.protobuf.Struct user_metadata = 5;
+
+    string singature = 6; // timestamp:shop_id:private_key -> sha256
+
+    string target_address = 7;
+
+    google.protobuf.Timestamp timestamp = 8;
+}
+
+message ActionExRequest {
+    string transaction_id = 1;
+
+    string signature = 2; // timestamp:shop_id:private_key -> sha256
+    
+    google.protobuf.Timestamp timestamp = 3;
+}
+
+message GetHistoryRequest {
+    uint32 page = 1;
+    uint32 size = 2;
+    string shop_id = 3;
+}
+
+message GetExRequest {
+    string transaction_id = 1;
+}
+
+message GetBalancesRequest {
+    string shop_id = 1;
+}
