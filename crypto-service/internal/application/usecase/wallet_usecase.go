@@ -18,6 +18,7 @@ import (
 	dbrepo "github.com/cnt-payz/payz/crypto-service/internal/infra/repository/database"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/google/uuid"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -168,15 +169,6 @@ func (wu *walletUsecase) Withdraw(ctx context.Context, req *walletdto.WithdrawRe
 	return wu.ethSDK.Withdraw(ctx, wallet.Address().String(), req.TargetAddress, amount)
 }
 
-func (wu *walletUsecase) walletDomainToDTOModel(wallet *walletdomain.Wallet) *walletdto.Wallet {
-	return &walletdto.Wallet{
-		ID:           wallet.ID().String(),
-		ShopID:       wallet.ShopID().String(),
-		Address:      wallet.Address().String(),
-		FrozenAmount: wallet.FrozenAmount().String(),
-	}
-}
-
 type ConfirmDepositReq struct {
 	TXID         string
 	ShopAddress  string
@@ -190,38 +182,54 @@ func (wu *walletUsecase) ConfirmDeposit(
 	shopAddress, takerAddress string,
 	amount uint64,
 ) {
+	md := metadata.New(map[string]string{
+		"idempotency-key": txID,
+	})
+
 	if err := wu.ethSDK.ConfirmDeposit(ctx, shopAddress, takerAddress, amount); err != nil {
 		wu.log.Debug("failed to confirm deposit", slog.String("err", err.Error()))
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		defer cancel()
 
-		timestamp := timestamppb.Now()
-		_, err := wu.paymentServiceClient.CancelExTransaction(ctx, &paymentpb.ActionExRequest{
-			TransactionId: txID,
-			Signature:     wu.generateSignature(timestamp, shopID),
-			Timestamp:     timestamp,
-		})
-		if err != nil {
-			wu.log.Error("failed to call cancel transaction to payment-service", slog.String("err", err.Error()))
+		for range 3 {
+			timestamp := time.Now().UTC()
+			_, err := wu.paymentServiceClient.CancelExTransaction(metadata.NewOutgoingContext(ctx, md), &paymentpb.ActionExRequest{
+				TransactionId: txID,
+				Signature:     wu.generateSignature(timestamp, txID),
+				Timestamp:     timestamppb.New(timestamp),
+			})
+			if err != nil {
+				wu.log.Error("failed to call cancel transaction to payment-service", slog.String("err", err.Error()))
+				continue
+			}
+
+			return
 		}
+
 		return
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
 
-	timestamp := timestamppb.Now()
-	_, err := wu.paymentServiceClient.ConfirmExTransaction(ctx, &paymentpb.ActionExRequest{
-		TransactionId: txID,
-		Signature:     wu.generateSignature(timestamp, shopID),
-		Timestamp:     timestamp,
-	})
-	if err != nil {
-		wu.log.Error("failed to call confirm transaction to payment-service", slog.String("err", err.Error()))
+	for range 3 {
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer cancel()
+
+		timestamp := time.Now().UTC()
+		_, err := wu.paymentServiceClient.ConfirmExTransaction(metadata.NewOutgoingContext(ctx, md), &paymentpb.ActionExRequest{
+			TransactionId: txID,
+			Signature:     wu.generateSignature(timestamp, txID),
+			Timestamp:     timestamppb.New(timestamp),
+		})
+		if err != nil {
+			wu.log.Error("failed to call confirm transaction to payment-service", slog.String("err", err.Error()))
+			continue
+		}
+
+		return
 	}
 }
 
-func (wu *walletUsecase) generateSignature(timestamp *timestamppb.Timestamp, shopID string) string {
-	hash := sha256.Sum256(fmt.Appendf(nil, "%s:%s:%s", timestamp.String(), shopID, wu.paymentPrivateKey))
+func (wu *walletUsecase) generateSignature(timestamp time.Time, txID string) string {
+	hash := sha256.Sum256(fmt.Appendf(nil, "%d:%s:%s", timestamp.UnixMilli(), txID, wu.paymentPrivateKey))
 	return hex.EncodeToString(hash[:])
 }
 
