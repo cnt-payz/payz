@@ -1,0 +1,17 @@
+http:
+  host: ${HTTP_HOST}
+  port: ${HTTP_PORT}
+grpc:
+  tls:
+    enable: false
+    ca-cert: ./certs/ca.crt
+    server-cert: ./certs/shop-gateway.crt
+    client-cert: ./certs/client.crt
+    client-key: ./certs/client.key
+  shop-service:
+    host: ${GRPC_SHOP_SERVICE_HOST}
+    port: ${GRPC_SHOP_SERVICE_PORT}
+logger:
+  level: debug
+  output-type: console
+  json-format: false

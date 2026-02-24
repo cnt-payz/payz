@@ -1,0 +1,52 @@
+syntax = "proto3";
+package shopv1;
+option go_package = "github.com/cnt-payz/payz/shop;shoppb";
+
+import "google/protobuf/empty.proto";
+
+service ShopService {
+    rpc CreateShop (CreateShopReq) returns (CreateShopResp);
+    rpc GetShopByOwner (GetShopByOwnerReq) returns (GetShopByOwnerResp);
+    rpc GetShopsByUserID (google.protobuf.Empty) returns (GetShopsByUserIDResp);
+    rpc UpdateShopByID (UpdateShopByIDReq) returns (UpdateShopByIDResp);
+    rpc DeleteShopByID (DeleteShopByIDReq) returns (google.protobuf.Empty);
+}
+
+message Shop {
+    string id = 1;
+    string user_id = 2;
+    string name = 3;
+}
+
+message CreateShopReq {
+    string name = 1;
+}
+
+message CreateShopResp {
+    Shop shop = 1;
+}
+
+message GetShopByOwnerReq {
+    string id = 1;
+}
+
+message GetShopByOwnerResp {
+    Shop shop = 1;
+}
+
+message GetShopsByUserIDResp {
+    repeated Shop shops = 1;
+}
+
+message UpdateShopByIDReq {
+    string id = 1;
+    string name = 2;
+}
+
+message UpdateShopByIDResp {
+    Shop shop = 1;   
+}
+
+message DeleteShopByIDReq {
+    string id = 1;
+}
