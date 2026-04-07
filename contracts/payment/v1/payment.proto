@@ -20,7 +20,7 @@ enum Typ {
 }
 
 message Amount {
-    string amount = 1; //  "1000000" = 1usdt
+    string amount = 1; //  "123.455654"
 }
 
 // Domain model of ex-transaction
@@ -58,7 +58,7 @@ service Payment {
     // Create an ex-transaction
     // REQUIRES: mtls connection
     // METADATA: authorization
-    rpc MakeExTransaction(MakeExRequest) returns (MakeExResponse);
+    rpc MakeExTransaction(MakeExRequest) returns (ExTransaction);
     // Confirm an ex-transaction
     // REQUIRES: mtls connection
     // METADATA: idempotency-key
@@ -82,11 +82,6 @@ service Payment {
     rpc GetBalances(GetBalancesRequest) returns (Balances);
 }
 
-message MakeExResponse {
-    ExTransaction transaction = 1;
-    string target_address = 2;
-}
-
 message MakeExRequest {
     string shop_id = 1;
 
@@ -99,9 +94,7 @@ message MakeExRequest {
 
     string singature = 6; // timestamp:shop_id:private_key -> sha256
 
-    string target_address = 7;
-
-    google.protobuf.Timestamp timestamp = 8;
+    google.protobuf.Timestamp timestamp = 7;
 }
 
 message ActionExRequest {
